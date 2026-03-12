@@ -1,10 +1,14 @@
 package com.rfueta.auth.service;
 
+import com.rfueta.auth.model.User;
 import com.rfueta.auth.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -16,11 +20,22 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username)
+    public UserDetails loadUserByUsername(String login)
             throws UsernameNotFoundException {
 
-        return userRepository.findByUsername(username)
+        User user = userRepository
+                .findByUsernameOrEmail(login, login)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Usuario no encontrado: " + username));
+                        new UsernameNotFoundException("Usuario no encontrado: " + login));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),                 // principal
+                user.getPassword(),                 // password encriptado
+                user.isEnabled(),                   // enabled
+                true,            // accountNonExpired
+                true,        // credentialsNonExpired
+                true,             // accountNonLocked
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
     }
 }

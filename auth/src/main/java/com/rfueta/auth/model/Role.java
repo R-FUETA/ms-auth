@@ -1,4 +1,4 @@
-package com.rfueta.auth.domain;
+package com.rfueta.auth.model;
 
 public enum Role {
     USER,

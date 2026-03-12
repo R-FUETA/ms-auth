@@ -1,4 +1,4 @@
-package com.rfueta.auth.domain;
+package com.rfueta.auth.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,10 +11,9 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "username")
-        })
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "username")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,16 +23,20 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_user")
+    private Long idUser;
 
     @Column(nullable = false, length = 30)
     private String username;
 
+    @Column(nullable = false, length = 100, unique = true)
+    private String email;
+
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role role;
 
     @Column(nullable = false)
@@ -50,8 +53,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(
-                new SimpleGrantedAuthority("ROLE_" + role.name())
-        );
+                new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
