@@ -1,0 +1,5 @@
+duoc\fs3\ms_auth\security\JwtServiceTest.class
+duoc\fs3\ms_auth\service\CustomUserDetailsServiceTest.class
+duoc\fs3\ms_auth\controller\AuthControllerTest.class
+duoc\fs3\ms_auth\validation\PasswordValidatorTest.class
+duoc\fs3\ms_auth\MsAuthApplicationTests.class
