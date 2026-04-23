@@ -7,6 +7,9 @@ Microservicio de autenticación de usuarios desarrollado con Spring Boot 3.5.13,
 - **Registro de usuarios**: Creación de nuevas cuentas con validación de datos
 - **Autenticación JWT**: Inicio de sesión con generación de tokens JSON Web Token
 - **Validación de contraseñas**: Políticas de seguridad configurables para contraseñas
+- **Arquitectura limpia**: Separación de responsabilidades con AuthService
+- **Clave JWT fija**: Configurable para escalabilidad en Docker/AWS
+- **Seguridad mejorada**: Headers HTTP seguros y configuración CORS
 - **Documentación Swagger**: API documentada automáticamente con OpenAPI 3.0
 - **Pruebas unitarias**: Cobertura de pruebas para los componentes principales
 - **Base de datos MySQL**: Configurado para desarrollo local con Laragon
@@ -27,7 +30,7 @@ Microservicio de autenticación de usuarios desarrollado con Spring Boot 3.5.13,
 
 - **Group**: duoc.fs3
 - **Artifact**: ms-auth
-- **Package**: duoc.fs3.ms-auth
+- **Package**: duoc.fs3.ms_auth
 - **Version**: 0.0.1-SNAPSHOT
 
 ## Requisitos Previos
@@ -141,7 +144,7 @@ Propiedades externas que pueden ser modificadas sin recompilar la aplicación.
 ## Estructura del Proyecto
 
 ```
-src/main/java/duoc/fs3/ms-auth/
+src/main/java/duoc/fs3/ms_auth/
 |-- MsAuthApplication.java          # Clase principal
 |-- config/                         # Configuraciones
 |   |-- SecurityConfig.java        # Configuración de seguridad
@@ -149,7 +152,7 @@ src/main/java/duoc/fs3/ms-auth/
 |   |-- SecurityBeansConfig.java   # Beans de seguridad
 |   |-- OpenApiConfig.java          # Configuración Swagger/OpenAPI
 |-- controller/
-|   |-- AuthController.java         # Endpoints de autenticación
+|   |-- AuthController.java         # Endpoints de autenticación (capa de presentación)
 |-- dto/                            # Data Transfer Objects
 |   |-- request/                    # DTOs de entrada
 |   |-- response/                   # DTOs de salida
@@ -159,15 +162,40 @@ src/main/java/duoc/fs3/ms-auth/
 |-- repository/
 |   |-- UserRepository.java         # Repositorio JPA
 |-- security/
-|   |-- JwtService.java             # Servicio JWT
+|   |-- JwtService.java             # Servicio JWT (clave fija configurada)
 |   |-- JwtAuthenticationFilter.java # Filtro JWT
 |-- service/
+|   |-- AuthService.java            # Servicio de autenticación (lógica de negocio)
 |   |-- CustomUserDetailsService.java # Servicio de detalles de usuario
 |-- validation/                     # Validadores personalizados
 |   |-- PasswordValidator.java      # Validador de contraseñas
 |   |-- PasswordMatches.java        # Anotación de validación
 |   |-- PasswordMatchesValidator.java # Validador de coincidencias
 ```
+
+## Arquitectura del Microservicio
+
+### Separación de Responsabilidades
+El microservicio sigue una arquitectura limpia con separación clara de responsabilidades:
+
+- **Controller**: Manejo de solicitudes HTTP y respuestas
+- **Service**: Lógica de negocio centralizada en `AuthService`
+- **Repository**: Acceso a datos con Spring Data JPA
+- **Security**: Configuración de seguridad y gestión JWT
+
+### Configuración JWT
+La clave JWT es fija y configurable para garantizar consistencia entre instancias:
+
+```properties
+# Clave secreta fija para firmar tokens JWT (Base64 encoded)
+jwt.secret=bXlZGVmYXVsdEtleXRrZXNLXRlc3JldGlvbkVzZXJjZXRTZWNyZXRLZXk5b25zSGFzaTI1NkFsZ29yaXRobA==
+```
+
+### Ventajas de la Arquitectura
+- **Escalabilidad**: Clave JWT fija para Docker y entornos en la nube
+- **Mantenibilidad**: Lógica centralizada facilita cambios futuros
+- **Testing**: Más fácil de probar componentes de forma aislada
+- **Seguridad**: Configuración centralizada de políticas de seguridad
 
 ## Desarrollo
 

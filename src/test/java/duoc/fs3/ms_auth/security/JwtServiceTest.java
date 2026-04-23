@@ -110,9 +110,9 @@ class JwtServiceTest {
      */
     @Test
     @DisplayName("Debería retornar una clave válida")
-    void testGetKey() {
+    void testGetSigningKey() {
         // When
-        var key = jwtService.getKey();
+        var key = jwtService.getSigningKey();
 
         // Then
         assertNotNull(key);

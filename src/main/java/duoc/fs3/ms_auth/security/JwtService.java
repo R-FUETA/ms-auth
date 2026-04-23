@@ -1,19 +1,21 @@
 package duoc.fs3.ms_auth.security;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.util.Base64;
 import java.util.Date;
 
 /**
  * Servicio para la gestión de tokens JWT.
  * 
  * Esta clase proporciona métodos para generar, validar y extraer información
- * de tokens JSON Web Token (JWT). Utiliza una clave secreta generada
- * automáticamente para firmar los tokens.
+ * de tokens JSON Web Token (JWT). Utiliza una clave secreta fija
+ * configurada desde application.properties para garantizar consistencia
+ * en entornos escalados como Docker.
  * 
  * @author Duoc UC Fullstack III
  * @version 1.0
@@ -22,11 +24,17 @@ import java.util.Date;
 @Service
 public class JwtService {
 
+    // Constantes para configuración JWT
+    private static final String DEFAULT_SECRET = "myDefaultSecretKeyThatMustBeAtLeast256BitsLongForHS256Algorithm";
+    private static final long TOKEN_VALIDITY_MS = 3600000; // 1 hora en milisegundos
+
     /**
      * Clave secreta utilizada para firmar los tokens JWT.
-     * Se genera automáticamente utilizando el algoritmo HS256.
+     * Se obtiene desde application.properties para garantizar
+     * que sea la misma en todas las instancias.
      */
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Value("${jwt.secret:" + DEFAULT_SECRET + "}")
+    private String jwtSecret;
 
     /**
      * Genera un token JWT para el usuario especificado.
@@ -39,8 +47,8 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hora
-                .signWith(key)
+                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY_MS))
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -53,7 +61,7 @@ public class JwtService {
      */
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -65,7 +73,8 @@ public class JwtService {
      * 
      * @return Clave secreta para firmar tokens JWT
      */
-    public Key getKey() {
-        return key;
+    public SecretKey getSigningKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
